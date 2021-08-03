@@ -19,7 +19,13 @@ class TraxPlayer {
         this.sampleUrl = sampleUrl;
         var tracks = [];
         for (var i = 0; i < 4; i++) {
-            tracks.push({ player: new Audio(), timeLeft: 0, repeat: 0, sample: 0, playlist: [] });
+            tracks.push({
+                player: new Audio(),
+                timeLeft: 0,
+                repeat: 0,
+                sample: 0,
+                playlist: []
+            });
         }
         this.tracks = tracks;
         this.Preload();
@@ -30,19 +36,12 @@ class TraxPlayer {
     }
 
 
-
     GetTrack(sample) {
         var track = [];
         sample.split(";").forEach(sample => {
             var samplePiece = sample.split(",")[0];
             var repeat = sample.split(",")[1];
-
-            var test = [];
-            for (var i = 0; i < repeat; i++) {
-                track.push({ piece: })
-            }
-
-            //track.push({ repeat: repeat, piece: samplePiece })
+            track.push({ repeat: repeat, piece: samplePiece })
         });
         return track;
     }
@@ -86,7 +85,9 @@ class TraxPlayer {
             output = [];
         for (var t = 0; t < tracks.length; t++) {
             for (var i = 0; i < tracks[t].length; i++) {
-                if (flags[tracks[t][i].piece]) continue;
+                if (flags[tracks[t][i].piece])
+                    continue;
+
                 flags[tracks[t][i].piece] = true;
                 output.push(tracks[t][i]);
             }
@@ -113,28 +114,51 @@ class TraxPlayer {
         });
     }
 
-    Preload() {
-
-        // Load all samples in song
-        console.log(`SongUrl: ${this.songUrl}, sampleUrl: ${this.sampleUrl}`);
+    Preload() { // Load all samples in song
+        console.log(`SongUrl: ${
+            this.songUrl
+        }, sampleUrl: ${
+            this.sampleUrl
+        }`);
         var _self = this;
         this.FetchSong().then(function(tracks) {
             console.log("Song loaded, loading samples");
             console.log("TRACKS");
             console.log(tracks);
-            for (var i = 0; i < tracks.length; i++) {
-                _self.tracks[i].playlist = tracks[i];
-            }
             var uniqueSamples = _self.GetUniqueSamples(tracks).map(function(sample) {
                 return _self.GetDuration(sample);
             });
+
             Promise.all(uniqueSamples).then(function(richSamples) {
                 for (var i = 0; i < richSamples.length; i++) {
                     _self.samples[richSamples[i].sample.piece] = richSamples[i];
                 }
                 console.log("All samples loaded")
-                console.log(_self.samples);
+
+                for (var i = 0; i < tracks.length; i++) {
+
+
+                    // BUILD Actual Tracks
+                    var actualTrack = [];
+                    for (var t = 0; t < tracks[i].length; t++) {
+                        //console.log(_self.samples[tracks[i][t].piece].sampleLength)
+                        for (var x = 0; x < tracks[i][t].repeat; x++) {
+                            actualTrack.push(tracks[i][t].piece);
+                            for (var l = 0; l < _self.samples[tracks[i][t].piece].sampleLength - 1; l++) {
+                                actualTrack.push("0");
+                            }
+
+                        }
+                    }
+                    _self.tracks[i].playlist = actualTrack;
+                    // /
+                }
+
             });
+
+
+
+
 
         }).catch(function(err) {
             Log(err, "Failed during preload")
@@ -151,13 +175,20 @@ class TraxPlayer {
     }
 
     PlayNextBeat(track) {
-        console.log("############## " + track + "  ################");
-        console.log("TRACK POSITION: " + this.position);
-        console.log("TIMELEFT: " + this.tracks[track].timeLeft);
-        console.log("SAMPLE REPEAT: " + this.tracks[track].repeat);
-        console.log("SAMPLE: " + this.tracks[track].sample);
+        this.tracks[track].player = this.samples[this.tracks[track].playlist[this.position]].audioObj;
+        this.tracks[track].timeLeft = this.samples[this.tracks[track].playlist[this.position]].sampleLength;
+        this.tracks[track].repeat = this.tracks[track].playlist[this.position].repeat;
+        this.tracks[track].sample = this.tracks[track].playlist[this.position];
+        if (this.tracks[track].sample != 0) {
+            this.tracks[track].player.play();
+        }
+        /* console.log("############## " + track + "  ################");
+         console.log("TRACK POSITION: " + this.position);
+         console.log("TIMELEFT: " + this.tracks[track].timeLeft);
+         console.log("SAMPLE REPEAT: " + this.tracks[track].repeat);
+         console.log("SAMPLE: " + this.tracks[track].sample);*/
 
-        if (this.tracks[track].timeLeft > 0) {
+        /*f (this.tracks[track].timeLeft > 0) {
             console.log("Minus time")
             this.tracks[track].timeLeft = this.tracks[track].timeLeft--;
         }
@@ -166,9 +197,8 @@ class TraxPlayer {
             this.tracks[track].repeat = this.tracks[track].repeat--;
         }
         if (this.tracks[track].timeLeft === 0) {
-            if (this.tracks[track].repeat != 0) {
-                this.tracks[track].player.play();
-                console.log("SDFsd")
+            if (this.tracks[track].repeat != 0) { // this.tracks[track].player.play();
+                console.log("Play")
                 return;
             }
 
@@ -179,15 +209,18 @@ class TraxPlayer {
             this.tracks[track].timeLeft = this.samples[this.tracks[track].playlist[this.position].piece].sampleLength;
             this.tracks[track].repeat = this.tracks[track].playlist[this.position].repeat;
             this.tracks[track].sample = this.tracks[track].playlist[this.position].piece;
-            this.tracks[track].player.play();
-        }
+
+            // this.tracks[track].player.play();
+        }*/
     }
 
     Play() {
         this.playing = !this.playing;
         if (this.playing) {
             this.position = 0;
-            this.ticker = setInterval(function() { this.Tick() }.bind(this), 2000);
+            this.ticker = setInterval(function() {
+                this.Tick()
+            }.bind(this), 2000);
         } else {
             clearInterval(this.ticker);
         }
