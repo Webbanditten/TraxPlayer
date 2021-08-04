@@ -1,6 +1,12 @@
-function Log(err, info) {
-    console.log("### ERROR: " + info);
-    console.log(err);
+function TraxLogger(log, type) {
+    if (type == "info") {
+        console.log("### INFO ###");
+        console.log(log);
+    } else {
+        console.log("### ERROR: " + info);
+        console.log(log);
+    }
+
 }
 class TraxPlayer {
     ticker;
@@ -10,7 +16,9 @@ class TraxPlayer {
     author;
     name;
     tracks;
+    volume;
     constructor(songUrl, sampleUrl) {
+        this.volume = 0.5;
         this.samples = new Array();
         this.ready = false;
         this.position = 0;
@@ -22,7 +30,7 @@ class TraxPlayer {
             tracks.push({
                 player: new Audio(),
                 timeLeft: 0,
-                repeat: 0,
+                blocks: 0,
                 sample: 0,
                 playlist: []
             });
@@ -40,25 +48,25 @@ class TraxPlayer {
         var track = [];
         sample.split(";").forEach(sample => {
             var samplePiece = sample.split(",")[0];
-            var repeat = sample.split(",")[1];
-            track.push({ repeat: repeat, piece: samplePiece })
+            var blocks = sample.split(",")[1];
+            track.push({ blocks: blocks, piece: samplePiece })
         });
         return track;
     }
 
     GetSampleLength(duration) {
 
-        var _loc2_ = duration * 1000;
-        if (_loc2_ < 2100) {
+        var result = duration * 1000;
+        if (result < 2100) {
             return 1;
         }
-        if (_loc2_ < 4100) {
+        if (result < 4100) {
             return 2;
         }
-        if (_loc2_ < 6100) {
+        if (result < 6100) {
             return 3;
         }
-        if (_loc2_ < 8100) {
+        if (result < 8100) {
             return 4;
         }
         throw new Error("Sample is too long:");
@@ -69,6 +77,7 @@ class TraxPlayer {
         return new Promise(function(resolve) {
             var audio = new Audio();
             audio.addEventListener('loadedmetadata', function() {
+                audio.volume = _self.volume;
                 resolve({
                     sampleLength: _self.GetSampleLength(audio.duration),
                     sample: sample,
@@ -93,7 +102,6 @@ class TraxPlayer {
             }
         }
         return output;
-
     }
 
     FetchSong() {
@@ -102,19 +110,41 @@ class TraxPlayer {
             .then(response => response.json())
             .then(data => console.log(data));*/
         var song = "status=0&name=Too lost in the lido&author=Patrick&track1=317,4;408,7;0,1;410,16;413,4;406,4;410,8;412,4:2:0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track2=0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track3=0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track4=0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3";
+        //var song = "status=0&name=test&author=Patrick&track1=4,4;9,2:2:0,5;311,&track2=0,5;311,1:3:0,4;308,1;0,1:4:0,2;307,1;0,3&track3=0,4;308,1;0,1:4:0,2;307,1;0,3&track4=0,2;307,1;0,3";
+        //var song = "status=0&name=test&author=Patrick&track1=4,12:2:0,5;311,1;0,6:3:0,4;308,1;0,7:4:0,2;307,1;0,9&track2=0,5;311,1;0,6:3:0,4;308,1;0,7:4:0,2;307,1;0,9&track3=0,4;308,1;0,7:4:0,2;307,1;0,9&track4=0,2;307,1;0,9";
         song = "?" + song;
         var urlSearchParams = new URLSearchParams(song);
 
         var track1 = urlSearchParams.get("track1").split(":2:")[0];
-        var track2 = urlSearchParams.get("track1").split(":2:")[1].split(":3:")[0];
-        var track3 = urlSearchParams.get("track1").split(":2:")[1].split(":3:")[1].split(":4:")[0];
-        var track4 = urlSearchParams.get("track1").split(":2:")[1].split(":3:")[1].split(":4:")[1];
+        var track2 = urlSearchParams.get("track2").split(":3:")[0];
+        var track3 = urlSearchParams.get("track3").split(":4:")[0];
+        var track4 = urlSearchParams.get("track4");
         return new Promise((resolve, reject) => {
             resolve([this.GetTrack(track1), this.GetTrack(track2), this.GetTrack(track3), this.GetTrack(track4)]);
         });
     }
 
+    InitPlayer() {
+        var _self = this;
+        (function() {
+            var slider = document.getElementById("trax-volume");
+
+            // Update the current slider value (each time you drag the slider handle)
+            slider.oninput = function() {
+                _self.volume = this.value / 100;
+                for (var i = 0; i < _self.tracks.length; i++) {
+                    _self.tracks[i].player.volume = _self.volume;
+                }
+            }
+
+        })();
+
+    }
+
     Preload() { // Load all samples in song
+
+        this.InitPlayer();
+
         console.log(`SongUrl: ${
             this.songUrl
         }, sampleUrl: ${
@@ -141,8 +171,8 @@ class TraxPlayer {
                     // BUILD Actual Tracks
                     var actualTrack = [];
                     for (var t = 0; t < tracks[i].length; t++) {
-                        //console.log(_self.samples[tracks[i][t].piece].sampleLength)
-                        for (var x = 0; x < tracks[i][t].repeat; x++) {
+                        var repeat = tracks[i][t].blocks / _self.samples[tracks[i][t].piece].sampleLength;
+                        for (var x = 0; x < repeat; x++) {
                             actualTrack.push(tracks[i][t].piece);
                             for (var l = 0; l < _self.samples[tracks[i][t].piece].sampleLength - 1; l++) {
                                 actualTrack.push("0");
@@ -151,14 +181,10 @@ class TraxPlayer {
                         }
                     }
                     _self.tracks[i].playlist = actualTrack;
-                    // /
+                    console.log(actualTrack);
                 }
 
             });
-
-
-
-
 
         }).catch(function(err) {
             Log(err, "Failed during preload")
@@ -167,7 +193,6 @@ class TraxPlayer {
     }
 
     Tick() {
-        console.log("Tick");
         for (var i = 0; i < this.tracks.length; i++) {
             this.PlayNextBeat(i);
         }
@@ -175,53 +200,32 @@ class TraxPlayer {
     }
 
     PlayNextBeat(track) {
-        this.tracks[track].player = this.samples[this.tracks[track].playlist[this.position]].audioObj;
-        this.tracks[track].timeLeft = this.samples[this.tracks[track].playlist[this.position]].sampleLength;
-        this.tracks[track].repeat = this.tracks[track].playlist[this.position].repeat;
-        this.tracks[track].sample = this.tracks[track].playlist[this.position];
-        if (this.tracks[track].sample != 0) {
-            this.tracks[track].player.play();
-        }
-        /* console.log("############## " + track + "  ################");
-         console.log("TRACK POSITION: " + this.position);
-         console.log("TIMELEFT: " + this.tracks[track].timeLeft);
-         console.log("SAMPLE REPEAT: " + this.tracks[track].repeat);
-         console.log("SAMPLE: " + this.tracks[track].sample);*/
-
-        /*f (this.tracks[track].timeLeft > 0) {
-            console.log("Minus time")
-            this.tracks[track].timeLeft = this.tracks[track].timeLeft--;
-        }
-        if (this.tracks[track].repeat > 0) {
-            console.log("Minus repeat")
-            this.tracks[track].repeat = this.tracks[track].repeat--;
-        }
-        if (this.tracks[track].timeLeft === 0) {
-            if (this.tracks[track].repeat != 0) { // this.tracks[track].player.play();
-                console.log("Play")
-                return;
+        if (this.samples[this.tracks[track].playlist[this.position]]) {
+            this.tracks[track].player = this.samples[this.tracks[track].playlist[this.position]].audioObj;
+            this.tracks[track].timeLeft = this.samples[this.tracks[track].playlist[this.position]].sampleLength;
+            this.tracks[track].blocks = this.tracks[track].playlist[this.position].blocks;
+            this.tracks[track].sample = this.tracks[track].playlist[this.position];
+            if (this.tracks[track].sample != 0) {
+                console.log("TRACK " + track + " PLAYING: " + this.tracks[track].playlist[this.position])
+                this.tracks[track].player.currentTime = 0;
+                this.tracks[track].player.volume = this.volume;
+                this.tracks[track].player.play();
             }
-
         }
-
-        if (this.tracks[track].playlist[this.position]) {
-            this.tracks[track].player = this.samples[this.tracks[track].playlist[this.position].piece].audioObj;
-            this.tracks[track].timeLeft = this.samples[this.tracks[track].playlist[this.position].piece].sampleLength;
-            this.tracks[track].repeat = this.tracks[track].playlist[this.position].repeat;
-            this.tracks[track].sample = this.tracks[track].playlist[this.position].piece;
-
-            // this.tracks[track].player.play();
-        }*/
     }
 
     Play() {
         this.playing = !this.playing;
         if (this.playing) {
             this.position = 0;
+            this.Tick();
             this.ticker = setInterval(function() {
                 this.Tick()
             }.bind(this), 2000);
         } else {
+            for (var i = 0; i < this.tracks.length; i++) {
+                this.tracks[i].player.pause();
+            }
             clearInterval(this.ticker);
         }
     }

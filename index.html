@@ -3,13 +3,54 @@
 
 <head>
     <title></title>
-
+    <style>
+        .slidecontainer {
+            margin-bottom: 40px;
+            position: relative;
+        }
+        /* The slider itself */
+        
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 62px;
+            top: -4px;
+            background: transparent;
+            outline: none;
+            width: 62px;
+            height: 8px;
+            background: url(images/volume.png);
+            background-repeat: no-repeat;
+        }
+        /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 8px;
+            height: 12px;
+            border: 0;
+            background: url('images/volume_button.png');
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 8px;
+            height: 12px;
+            border: 0;
+            background: url('images/volume_button.png');
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
 
     <div class="trax-player" id="trax-player">
+        <div class="slidecontainer">
+            <input type="range" min="1" max="100" value="50" class="slider" id="trax-volume">
+        </div>
         <div class="control">
             <button onClick={_traxPlayer.Play()}>Play</button>
         </div>
