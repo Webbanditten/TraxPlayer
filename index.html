@@ -4,13 +4,13 @@
 <head>
     <title></title>
     <style>
-        .slidecontainer {
+        #trax-player .volumecontainer {
             margin-bottom: 40px;
             position: relative;
         }
         /* The slider itself */
         
-        .slider {
+        #trax-player .volume {
             -webkit-appearance: none;
             appearance: none;
             width: 62px;
@@ -24,7 +24,7 @@
         }
         /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
         
-        .slider::-webkit-slider-thumb {
+        #trax-player .volume::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 8px;
@@ -34,22 +34,86 @@
             cursor: pointer;
         }
         
-        .slider::-moz-range-thumb {
+        #trax-player .volume::-moz-range-thumb {
             width: 8px;
             height: 12px;
             border: 0;
             background: url('images/volume_button.png');
             cursor: pointer;
         }
+        
+        #trax-player {
+            width: 209px;
+            position: relative;
+        }
+        
+        #trax-player .display {
+            background-image: url(images/display.png);
+            height: 35px;
+            background-repeat: no-repeat;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 10px;
+        }
+        
+        #trax-player .display-inner {
+            padding-left: 7px;
+            padding-top: 4px;
+        }
+        
+        #trax-player .loading {
+            background-image: url(images/loading.gif);
+            background-position: center;
+            width: 100%;
+            top: 10px;
+            background-repeat: no-repeat;
+            height: 18px;
+            position: absolute;
+        }
+        
+        #trax-player .volumecontainer .volume-indicator {
+            width: 62px;
+            height: 9px;
+            background: url(images/sound_empty.png);
+            background-repeat: no-repeat;
+        }
+        
+        #trax-player .volumecontainer .volume-indicator-filled {
+            width: 62px;
+            height: 9px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #trax-player .volumecontainer .volume-indicator-filled-bg {
+            height: 9px;
+            width: 62px;
+            position: absolute;
+            background-image: url(images/sound_filled.png);
+            background-repeat: no-repeat;
+            background-size: 62px 9px;
+        }
     </style>
 </head>
 
 <body>
-
+    <img src="images/trax.png" />
 
     <div class="trax-player" id="trax-player">
-        <div class="slidecontainer">
-            <input type="range" min="1" max="100" value="50" class="slider" id="trax-volume">
+        <div class="display">
+            <div class="loading"></div>
+            <div class="display-inner">
+                <div class="title"></div>
+                <div class="author"></div>
+            </div>
+
+        </div>
+        <div class="volumecontainer">
+            <div class="volume-indicator">
+                <div class="volume-indicator-filled">
+                    <div class="volume-indicator-filled-bg"></div>
+                </div>
+            </div>
+            <input type="range" min="0" max="100" value="50" class="volume">
         </div>
         <div class="control">
             <button onClick={_traxPlayer.Play()}>Play</button>

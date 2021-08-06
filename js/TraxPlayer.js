@@ -17,6 +17,7 @@ class TraxPlayer {
     name;
     tracks;
     volume;
+    playerElement;
     constructor(songUrl, sampleUrl) {
         this.volume = 0.5;
         this.samples = new Array();
@@ -25,6 +26,7 @@ class TraxPlayer {
         this.playing = false;
         this.songUrl = songUrl;
         this.sampleUrl = sampleUrl;
+        this.playerElement = document.getElementById("trax-player");
         var tracks = [];
         for (var i = 0; i < 4; i++) {
             tracks.push({
@@ -37,12 +39,37 @@ class TraxPlayer {
         }
         this.tracks = tracks;
         this.Preload();
+
+        var _self = this;
+        var volume = _self.playerElement.getElementsByClassName("volume");
+        if (volume.length > 0) {
+            var slider = volume[0];
+
+            slider.oninput = function() {
+                _self.SetVolume(this.value);
+            }
+        }
+    }
+
+    SetVolume(volume) {
+        var volumeIndicator = this.playerElement.getElementsByClassName("volume-indicator-filled");
+        if (volumeIndicator.length > 0) {
+            volumeIndicator[0].style.width = ((62 / 100) * volume) + "px";
+        }
+
+        this.volume = volume / 100;
+        for (var i = 0; i < this.tracks.length; i++) {
+            this.tracks[i].player.volume = this.volume;
+        }
+
+        this.samples.forEach(sample => {
+            sample.audioObj.volume = this.volume;
+        });
     }
 
     GetSampleUrl(sampleId) {
         return this.sampleUrl + "sound_machine_sample_" + sampleId + ".mp3";
     }
-
 
     GetTrack(sample) {
         var track = [];
@@ -119,31 +146,37 @@ class TraxPlayer {
         var track2 = urlSearchParams.get("track2").split(":3:")[0];
         var track3 = urlSearchParams.get("track3").split(":4:")[0];
         var track4 = urlSearchParams.get("track4");
+        this.title = urlSearchParams.get("name");
+        this.author = urlSearchParams.get("author");
         return new Promise((resolve, reject) => {
             resolve([this.GetTrack(track1), this.GetTrack(track2), this.GetTrack(track3), this.GetTrack(track4)]);
         });
     }
 
-    InitPlayer() {
-        var _self = this;
-        (function() {
-            var slider = document.getElementById("trax-volume");
+    OnReady() {
+        this.ready = true;
+        this.RemoveLoading();
+        this.SetTitleAndAuthor();
+    }
 
-            // Update the current slider value (each time you drag the slider handle)
-            slider.oninput = function() {
-                _self.volume = this.value / 100;
-                for (var i = 0; i < _self.tracks.length; i++) {
-                    _self.tracks[i].player.volume = _self.volume;
-                }
-            }
-
-        })();
-
+    RemoveLoading() {
+        var loading = this.playerElement.getElementsByClassName("loading");
+        if (loading.length > 0) {
+            loading[0].remove();
+        }
+    }
+    SetTitleAndAuthor() {
+        var title = this.playerElement.getElementsByClassName("title");
+        var author = this.playerElement.getElementsByClassName("author");
+        if (title.length > 0) {
+            title[0].innerHTML = this.title;
+        }
+        if (author.length > 0) {
+            author[0].innerHTML = this.author;
+        }
     }
 
     Preload() { // Load all samples in song
-
-        this.InitPlayer();
 
         console.log(`SongUrl: ${
             this.songUrl
@@ -181,7 +214,8 @@ class TraxPlayer {
                         }
                     }
                     _self.tracks[i].playlist = actualTrack;
-                    console.log(actualTrack);
+
+                    _self.OnReady();
                 }
 
             });
@@ -193,10 +227,13 @@ class TraxPlayer {
     }
 
     Tick() {
-        for (var i = 0; i < this.tracks.length; i++) {
-            this.PlayNextBeat(i);
+        if (this.playing) {
+            for (var i = 0; i < this.tracks.length; i++) {
+                this.PlayNextBeat(i);
+            }
+            this.position = this.position + 1;
         }
-        this.position = this.position + 1;
+
     }
 
     PlayNextBeat(track) {
@@ -223,10 +260,13 @@ class TraxPlayer {
                 this.Tick()
             }.bind(this), 2000);
         } else {
+            clearInterval(this.ticker);
             for (var i = 0; i < this.tracks.length; i++) {
                 this.tracks[i].player.pause();
             }
-            clearInterval(this.ticker);
+            this.samples.forEach(sample => {
+                sample.audioObj.pause();
+            });
         }
     }
 }
