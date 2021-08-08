@@ -41,6 +41,7 @@ class TraxPlayer {
         this.Preload();
 
         var _self = this;
+        _self.SetVolume(this.volume * 100);
         var volume = _self.playerElement.getElementsByClassName("volume");
         if (volume.length > 0) {
             var slider = volume[0];
@@ -253,7 +254,19 @@ class TraxPlayer {
 
     Play() {
         this.playing = !this.playing;
+        var playBtn = this.playerElement.getElementsByClassName("play-btn");
+        var musicActivity = this.playerElement.getElementsByClassName("music-activity");
         if (this.playing) {
+
+
+            if (playBtn.length > 0) {
+                playBtn[0].classList.add("playing");
+            }
+
+            if (musicActivity.length > 0) {
+                musicActivity[0].classList.add("playing");
+            }
+
             this.position = 0;
             this.Tick();
             this.ticker = setInterval(function() {
@@ -267,6 +280,14 @@ class TraxPlayer {
             this.samples.forEach(sample => {
                 sample.audioObj.pause();
             });
+
+            if (playBtn.length > 0) {
+                playBtn[0].classList.remove("playing");
+            }
+
+            if (musicActivity.length > 0) {
+                musicActivity[0].classList.remove("playing");
+            }
         }
     }
 }
