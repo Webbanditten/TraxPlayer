@@ -18,6 +18,9 @@ class TraxPlayer {
     tracks;
     volume;
     playerElement;
+    time;
+    timeInSeconds;
+    traxLengthInSeconds;
     constructor(songUrl, sampleUrl) {
         this.volume = 0.5;
         this.samples = new Array();
@@ -26,6 +29,10 @@ class TraxPlayer {
         this.playing = false;
         this.songUrl = songUrl;
         this.sampleUrl = sampleUrl;
+        this.traxLengthInSeconds = 0;
+        this.timeInSeconds = 0;
+        this.name = "";
+        this.author = "";
         this.playerElement = document.getElementById("trax-player");
         var tracks = [];
         for (var i = 0; i < 4; i++) {
@@ -137,15 +144,16 @@ class TraxPlayer {
         /*fetch(this.songUrl)
             .then(response => response.json())
             .then(data => console.log(data));*/
-        var song = "status=0&name=Too lost in the lido&author=Patrick&track1=317,4;408,7;0,1;410,16;413,4;406,4;410,8;412,4:2:0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track2=0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track3=0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track4=0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3";
+        var song = "status=0&name=Too lost in the lido&author=Patrick&track1=317,4;408,7;0,1;410,16;413,4;406,4;410,8;412,4&track2=0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2&track3=0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4&track4=0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3";
+        //var song = "status=0&name=Too lost in the lido&author=Patrick&track1=317,4;408,7;0,1;410,16;413,4;406,4;410,8;412,4:2:0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track2=0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track3=0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track4=0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3";
         //var song = "status=0&name=test&author=Patrick&track1=4,4;9,2:2:0,5;311,&track2=0,5;311,1:3:0,4;308,1;0,1:4:0,2;307,1;0,3&track3=0,4;308,1;0,1:4:0,2;307,1;0,3&track4=0,2;307,1;0,3";
         //var song = "status=0&name=test&author=Patrick&track1=4,12:2:0,5;311,1;0,6:3:0,4;308,1;0,7:4:0,2;307,1;0,9&track2=0,5;311,1;0,6:3:0,4;308,1;0,7:4:0,2;307,1;0,9&track3=0,4;308,1;0,7:4:0,2;307,1;0,9&track4=0,2;307,1;0,9";
         song = "?" + song;
         var urlSearchParams = new URLSearchParams(song);
 
-        var track1 = urlSearchParams.get("track1").split(":2:")[0];
-        var track2 = urlSearchParams.get("track2").split(":3:")[0];
-        var track3 = urlSearchParams.get("track3").split(":4:")[0];
+        var track1 = urlSearchParams.get("track1");
+        var track2 = urlSearchParams.get("track2");
+        var track3 = urlSearchParams.get("track3");
         var track4 = urlSearchParams.get("track4");
         this.title = urlSearchParams.get("name");
         this.author = urlSearchParams.get("author");
@@ -215,9 +223,9 @@ class TraxPlayer {
                         }
                     }
                     _self.tracks[i].playlist = actualTrack;
-
-                    _self.OnReady();
                 }
+                _self.CalculatePlaytime();
+                _self.OnReady();
 
             });
 
@@ -227,6 +235,50 @@ class TraxPlayer {
 
     }
 
+    CalculatePlaytime() {
+        var longestTrack = this.tracks[0].playlist;
+        for (var t = 0; t < this.tracks.length; t++) {
+            console.log(this.tracks[t].playlist.length)
+            if (this.tracks[t].playlist.length > longestTrack.length) {
+                longestTrack = this.tracks[t].playlist;
+            }
+        }
+        var traxLengthInSeconds = longestTrack.length * 2;
+        this.traxLengthInSeconds = traxLengthInSeconds;
+
+        this.SetPlayTime();
+    }
+
+    SetPlayTime() {
+        var str = this.SecondsToString(this.traxLengthInSeconds);
+        var time = this.playerElement.getElementsByClassName("time");
+        if (time.length > 0) {
+            var totalTimeElement = document.createElement('span');
+            totalTimeElement.innerHTML = "(" + str + ")";
+            totalTimeElement.classList.add("length");
+            time[0].innerHTML = this.SecondsToString(this.timeInSeconds);
+            time[0].appendChild(totalTimeElement);
+        }
+
+
+
+        console.log(str);
+    }
+
+    SecondsToString(seconds) {
+        var d = Number(seconds);
+        var m = Math.floor(d % 3600 / 60);
+        var s = Math.floor(d % 3600 % 60);
+
+        var str = "0" + m + ":";
+        if (s < 10) {
+            str += "0";
+        }
+        str += "" + s;
+        return str;
+    }
+
+
     Tick() {
         if (this.playing) {
             for (var i = 0; i < this.tracks.length; i++) {
@@ -235,6 +287,11 @@ class TraxPlayer {
             this.position = this.position + 1;
         }
 
+    }
+
+    Time() {
+        this.timeInSeconds = this.timeInSeconds + 1;
+        this.SetPlayTime();
     }
 
     PlayNextBeat(track) {
@@ -272,8 +329,14 @@ class TraxPlayer {
             this.ticker = setInterval(function() {
                 this.Tick()
             }.bind(this), 2000);
+            this.time = setInterval(function() {
+                this.Time()
+            }.bind(this), 1000);
         } else {
             clearInterval(this.ticker);
+            clearInterval(this.time);
+            this.timeInSeconds = 0;
+            this.SetPlayTime();
             for (var i = 0; i < this.tracks.length; i++) {
                 this.tracks[i].player.pause();
             }

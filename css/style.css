@@ -58,7 +58,18 @@
 
 #trax-player .display-inner {
     padding-left: 7px;
+    padding-right: 9px;
     padding-top: 4px;
+}
+
+#trax-player .time {
+    float: right;
+    margin-top: -13px;
+}
+
+#trax-player .time .length {
+    color: #9eac82;
+    padding-left: 6px;
 }
 
 #trax-player .loading {
