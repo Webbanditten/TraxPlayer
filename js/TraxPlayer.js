@@ -220,7 +220,7 @@ class TraxPlayer {
             });
 
         }).catch(function(err) {
-            Log(err, "Failed during preload")
+            console.log("Failed during preload");
         });
 
     }
