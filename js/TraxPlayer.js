@@ -1,13 +1,3 @@
-function TraxLogger(log, type) {
-    if (type == "info") {
-        console.log("### INFO ###");
-        console.log(log);
-    } else {
-        console.log("### ERROR: " + info);
-        console.log(log);
-    }
-
-}
 class TraxPlayer {
     ticker;
     playing;
