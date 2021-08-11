@@ -12,15 +12,24 @@ At the moment its working and its looking like this.
 
 ## How to use 
 
-A proper guide is coming soon
+### Data
+Your API Should return something like this data
 
-Embed the stylesheet
+```text
+status=0&name=Too lost in the lido&author=Patrick&track1=317,4;408,7;0,1;410,16;413,4;406,4;410,8;412,4&track2=0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2&track3=0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4&track4=0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3
+```
+
+The data should be based on the dynamic values probably in a database somewhere.
+If your trax is a single string your need to split out the string into the different tracks. The different tracks can be sepereated by the semicolons and their track number.
+
+
+### Embed the stylesheet
 
 ```html
 <link href="css/style.css" rel="stylesheet">
 ```
 
-Add the HTML
+### Add the HTML
 
 ```html
 <div class="trax-player" id="trax-player">
@@ -29,6 +38,7 @@ Add the HTML
         <div class="display-inner">
             <div class="title"></div>
             <div class="author"></div>
+            <div class="time"><span class="length"></span></div>
         </div>
 
     </div>
@@ -47,7 +57,7 @@ Add the HTML
 </div>
 ```
 
-Springle some javacript on it 
+### Springle some javacript on it 
 
 ```javascript
 var _traxPlayer = new TraxPlayer("SONGURL", "DIRECTORY_FOR_MP3"); 
