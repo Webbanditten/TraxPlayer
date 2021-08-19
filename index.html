@@ -33,7 +33,14 @@
 
     <script type="text/javascript" src="js/TraxPlayer.js"></script>
     <script>
-        var _traxPlayer = new TraxPlayer("https://habbo.webbanditten.dk/trax/song/23", "https://dcr.webbanditten.dk/trax/mp3/");
+      var _traxPlayer = new TraxPlayer("https://classichabbo.com/trax/song/560", "https://cdn.classichabbo.com/r38/dcr/hof_furni/mp3/");
+      
+      (async () => {
+        await _traxPlayer.Preload();
+      })()
+      .catch(error => {
+        console.log(error);
+      });
     </script>
 </body>
 
