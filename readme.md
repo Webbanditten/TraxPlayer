@@ -61,4 +61,11 @@ If your trax is a single string your need to split out the string into the diffe
 
 ```javascript
 var _traxPlayer = new TraxPlayer("SONGURL", "DIRECTORY_FOR_MP3"); 
+
+(async () => {
+    await _traxPlayer.Preload();
+})()
+.catch(error => {
+    console.log(error);
+});
 ```
