@@ -46,6 +46,8 @@
 #trax-player {
     width: 209px;
     position: relative;
+    text-align: left;
+    margin-bottom: 10px;
 }
 
 #trax-player .display {
@@ -54,6 +56,7 @@
     background-repeat: no-repeat;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: 10px;
+    color: #000;
 }
 
 #trax-player .display-inner {

@@ -92,7 +92,7 @@ class TraxPlayer {
         //if (result < 8100) {
         //    return 4;
         //}
-        
+
         return 4;
         //console.log(result);
         //throw new Error("Sample is too long:");
@@ -118,7 +118,7 @@ class TraxPlayer {
     GetUniqueSamples(tracks) {
         var flags = [];
         var output = [];
-        
+
         for (var t = 0; t < tracks.length; t++) {
             for (var i = 0; i < tracks[t].length; i++) {
                 if (flags[tracks[t][i].piece])
@@ -140,7 +140,7 @@ class TraxPlayer {
         //var song = "status=0&name=Too lost in the lido&author=Patrick&track1=317,4;408,7;0,1;410,16;413,4;406,4;410,8;412,4:2:0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track2=0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2:3:0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track3=0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4:4:0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3&track4=0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3";
         //var song = "status=0&name=test&author=Patrick&track1=4,4;9,2:2:0,5;311,&track2=0,5;311,1:3:0,4;308,1;0,1:4:0,2;307,1;0,3&track3=0,4;308,1;0,1:4:0,2;307,1;0,3&track4=0,2;307,1;0,3";
         //var song = "status=0&name=test&author=Patrick&track1=4,12:2:0,5;311,1;0,6:3:0,4;308,1;0,7:4:0,2;307,1;0,9&track2=0,5;311,1;0,6:3:0,4;308,1;0,7:4:0,2;307,1;0,9&track3=0,4;308,1;0,7:4:0,2;307,1;0,9&track4=0,2;307,1;0,9";
-        
+
         var song = await this.fetchUrl(this.songUrl);
         var urlSearchParams = new URLSearchParams("?" + song);
 
@@ -154,7 +154,7 @@ class TraxPlayer {
             resolve([this.GetTrack(track1), this.GetTrack(track2), this.GetTrack(track3), this.GetTrack(track4)]);
         });
     }
-    
+
     fetchUrl(url) {
         let myHeaders = new Headers();
         let options = {
@@ -197,10 +197,10 @@ class TraxPlayer {
             this.sampleUrl
         }`);
         var _self = this;
-        
+
         try {
             var tracks = await this.FetchSong();
-            
+
             console.log("Song loaded, loading samples");
             console.log("TRACKS");
             console.log(tracks);
@@ -236,9 +236,9 @@ class TraxPlayer {
 
             });
         } catch (err) {
-          console.log("Failed during preload", err);
+            console.log("Failed during preload", err);
         }
-        
+
         /*this.FetchSong().then(function(tracks) {
             console.log("Song loaded, loading samples");
             console.log("TRACKS");
@@ -335,7 +335,11 @@ class TraxPlayer {
 
     Time() {
         this.timeInSeconds = this.timeInSeconds + 1;
-        this.SetPlayTime();
+        if (this.timeInSeconds > this.traxLengthInSeconds) {
+            this.ResetPlayer();
+        } else {
+            this.SetPlayTime();
+        }
     }
 
     PlayNextBeat(track) {
@@ -377,24 +381,29 @@ class TraxPlayer {
                 this.Time()
             }.bind(this), 1000);
         } else {
-            clearInterval(this.ticker);
-            clearInterval(this.time);
-            this.timeInSeconds = 0;
-            this.SetPlayTime();
-            for (var i = 0; i < this.tracks.length; i++) {
-                this.tracks[i].player.pause();
-            }
-            this.samples.forEach(sample => {
-                sample.audioObj.pause();
-            });
+            this.ResetPlayer();
+        }
+    }
+    ResetPlayer() {
+        var musicActivity = this.playerElement.getElementsByClassName("music-activity");
+        var playBtn = this.playerElement.getElementsByClassName("play-btn");
+        clearInterval(this.ticker);
+        clearInterval(this.time);
+        this.timeInSeconds = 0;
+        this.SetPlayTime();
+        for (var i = 0; i < this.tracks.length; i++) {
+            this.tracks[i].player.pause();
+        }
+        this.samples.forEach(sample => {
+            sample.audioObj.pause();
+        });
 
-            if (playBtn.length > 0) {
-                playBtn[0].classList.remove("playing");
-            }
+        if (playBtn.length > 0) {
+            playBtn[0].classList.remove("playing");
+        }
 
-            if (musicActivity.length > 0) {
-                musicActivity[0].classList.remove("playing");
-            }
+        if (musicActivity.length > 0) {
+            musicActivity[0].classList.remove("playing");
         }
     }
 }
