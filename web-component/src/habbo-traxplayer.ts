@@ -66,13 +66,8 @@ export class TraxPlayer extends LitElement {
 
   async firstUpdated() {
     // Give the browser a chance to paint
-    await new Promise((r) => setTimeout(r, 0));
-    await (async () => {
-      await this._preload();
-    })()
-    .catch(error => {
-      console.log(error);
-    });
+    await new Promise((r) => setTimeout(r, 100));
+    await this._preload();
   }
 
   private async _fetchSong(): Promise<Track[][]> {
@@ -108,21 +103,22 @@ export class TraxPlayer extends LitElement {
   }
 
   private _getUniqueSamples(tracks: Track[][]): Track[] {
-    var flags: number[] = new Array();
+    var flags: boolean[] = new Array();
     var output = new Array();
 
     for (var t = 0; t < tracks.length; t++) {
       for (var i = 0; i < tracks[t].length; i++) {
         if (flags[tracks[t][i].piece]) continue;
 
-        flags.push(tracks[t][i].piece);
+        flags[tracks[t][i].piece] = true;
         output.push(tracks[t][i]);
       }
     }
     return output;
   }
 
-  private _getSampleLength(duration: number): number{
+  private _getSampleLength(duration: number): number {
+    console.log(duration)
     var result = duration * 1000;
     if (result < 2100) {
       return 1;
@@ -169,7 +165,7 @@ export class TraxPlayer extends LitElement {
       console.log("Song loaded, loading samples");
       console.log("TRACKS");
       console.log(tracks);
-      var uniqueSamples = _self
+      var uniqueSamples = this
         ._getUniqueSamples(tracks)
         .map(function (sample) {
           return _self._getDuration(sample);
@@ -182,11 +178,12 @@ export class TraxPlayer extends LitElement {
         }
         console.log("All samples loaded");
         for (var i = 0; i < tracks.length; i++) {
-          console.log("sdf")
           // BUILD Actual Tracks
           var actualTrack = [];
           for (var t = 0; t < tracks[i].length; t++) {
-            console.log(tracks[i][t].blocks)
+            if(!_self._samples[tracks[i][t].piece]) {
+              console.log("NOT FOUND: " + tracks[i][t].piece)
+            }
             var repeat =
               tracks[i][t].blocks /
               _self._samples[tracks[i][t].piece].sampleLength;
