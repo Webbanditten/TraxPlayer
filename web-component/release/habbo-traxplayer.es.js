@@ -889,7 +889,7 @@ let TraxPlayer = class extends s {
   }
   _fetchSong() {
     return __async(this, null, function* () {
-      var song = "status=0&name=Too lost in the lido&author=Patrick&track1=317,4;408,7;0,1;410,16;413,4;406,4;410,8;412,4&track2=0,2;321,2;443,22;91,2;317,8;443,8;412,2;0,2&track3=0,3;320,2;0,7;414,4;445,4;412,2;323,2;412,4;96,2;412,2;414,4;445,7;448,1;317,4&track4=0,3;324,2;0,6;448,1;0,6;96,2;322,4;96,2;99,2;322,4;412,2;0,2;322,2;96,2;322,2;0,1;324,2;0,3";
+      var song = yield this._fetchUrl(this.songUrl);
       var urlSearchParams = new URLSearchParams("?" + song);
       var track1 = urlSearchParams.get("track1");
       var track2 = urlSearchParams.get("track2");
@@ -1054,6 +1054,14 @@ let TraxPlayer = class extends s {
     } else {
       this._setPlayTime();
     }
+  }
+  _fetchUrl(url) {
+    let myHeaders = new Headers({ RequestMode: "cors" });
+    let options = {
+      method: "GET",
+      headers: myHeaders
+    };
+    return fetch(url, options).then((response) => response.text());
   }
   _tick() {
     if (this._playing) {

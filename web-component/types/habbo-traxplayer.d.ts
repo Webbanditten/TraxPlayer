@@ -33,6 +33,7 @@ declare class TraxPlayer extends LitElement {
     private _setPlayTime;
     private _secondsToString;
     private _setTime;
+    private _fetchUrl;
     private _tick;
     private _playNextBeat;
     private _resetPlayer;
