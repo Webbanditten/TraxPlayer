@@ -69,3 +69,15 @@ var _traxPlayer = new TraxPlayer("SONGURL", "DIRECTORY_FOR_MP3");
     console.log(error);
 });
 ```
+
+
+## Web-Component
+
+
+```html
+<script src="./web-component/release/habbo-traxplayer.es.js" type="text/javascript"></script>
+```
+
+```html
+<habbo-traxplayer sampleUrl="DIRECTORY_FOR_MP3" songUrl="URL_FOR_SONG" />
+```
