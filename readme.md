@@ -73,6 +73,7 @@ var _traxPlayer = new TraxPlayer("SONGURL", "DIRECTORY_FOR_MP3");
 
 ## Web-Component
 
+Use: [blob/main/web-component/release/habbo-traxplayer.es.js`](/web-component/release/habbo-traxplayer.es.js)
 
 ```html
 <script src="./web-component/release/habbo-traxplayer.es.js" type="text/javascript"></script>
